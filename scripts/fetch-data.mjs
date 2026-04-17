@@ -29,7 +29,7 @@ async function fetchAllCalls(fromTs) {
   console.log(`Fetching calls from ${new Date(fromTs * 1000).toISOString().slice(0, 10)}...`)
   while (page <= totalPages) {
     process.stdout.write(`\r  Page ${page}/${totalPages}   `)
-    const data = await aircall('/v1/calls', { page, per_page: PER_PAGE, from: fromTs, order: 'asc' })
+    const data = await aircall('/v1/calls', { page, per_page: PER_PAGE, from: fromTs, order: 'desc' })
     calls.push(...(data.calls || []))
     // Aircall uses meta.total (count), not meta.total_pages
     const total = data.meta?.total || calls.length
