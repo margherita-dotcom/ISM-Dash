@@ -78,7 +78,7 @@ export default function App() {
         <QualPanel
           calls={filtered}
           qualitative={data.qualitative}
-          topTags={data.top_tags}
+          topTopics={data.top_topics}
           hasAI={data.has_ai_analysis}
         />
       </main>
