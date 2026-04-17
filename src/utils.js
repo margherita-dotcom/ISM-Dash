@@ -3,7 +3,16 @@ export const DASHBOARD_USERS = [
   { id: 1728051, name: 'Wies', email: 'wies@quatt.io' },
   { id: 1788663, name: 'Valentina', email: 'valentina@quatt.io' },
   { id: 1843372, name: 'Bassel', email: 'bassel@quatt.io' },
+  { id: null, name: 'Jessey', email: 'jessey@quatt.io' }, // not in Aircall yet
 ]
+
+const DASHBOARD_USER_IDS = new Set(DASHBOARD_USERS.map(u => u.id).filter(Boolean))
+const ISM_NUMBER_ID = 1179637 // +31 20 532 6088 — IVR ISM
+
+// Base filter: only calls involving a dashboard user OR via the ISM number
+function isRelevantCall(c) {
+  return DASHBOARD_USER_IDS.has(c.user_id) || c.number_id === ISM_NUMBER_ID
+}
 
 export function getPeriodBounds(period) {
   const now = Math.floor(Date.now() / 1000)
@@ -14,6 +23,7 @@ export function getPeriodBounds(period) {
 export function filterCalls(calls, period, selectedUserIds) {
   const from = getPeriodBounds(period)
   return calls.filter(c => {
+    if (!isRelevantCall(c)) return false
     if (c.started_at < from) return false
     if (selectedUserIds.length > 0 && !selectedUserIds.includes(c.user_id)) return false
     return true

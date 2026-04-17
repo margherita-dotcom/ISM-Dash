@@ -84,19 +84,42 @@ function analyzeSentiment(text) {
 
 // Dutch + English stop words for transcript topic extraction
 const STOP = new Set([
-  'de','het','een','is','dat','op','te','en','van','ik','je','we','ze','hij','zij','dit','die',
-  'met','voor','niet','maar','ook','dan','meer','als','zo','er','bij','aan','zijn','was','hebben',
-  'heeft','had','worden','wordt','werd','kan','wil','moet','mag','zal','zou','wel','nog','al','nu',
-  'ja','nee','hoe','wat','wie','waar','wanneer','om','af','in','uit','over','door','naar','want',
-  'of','heb','bent','ben','dus','uw','ons','onze','hun','jullie','u','hem','haar','mij','mijn',
-  'jouw','heel','goed','even','eens','ok','okay','hm','hmm','dag','hoi','doei','bye','even',
-  'gewoon','want','eigenlijk','eigenlijk','misschien','gewoon','zeg','hoor','toch','echt','hier',
+  // Dutch articles/pronouns/prepositions
+  'de','het','een','dat','dit','die','deze','dan','meer','heel','toch','echt','hier','daar','toen',
+  'op','te','en','van','ik','je','we','ze','hij','zij','met','voor','niet','maar','ook','als','zo',
+  'er','bij','aan','zijn','was','om','af','in','uit','over','door','naar','of','heb','bent','ben',
+  'dus','uw','ons','onze','hun','jullie','u','hem','haar','mij','mijn','jouw','alle','elke',
+  'geen','iets','alles','niets','iemand','niemand','wel','nog','al','nu','ja','nee','hoe','wat',
+  'wie','waar','wanneer','want','want',
+  // Dutch verbs (infinitive + conjugations)
+  'zijn','hebben','hebben','heeft','had','hadden','worden','wordt','werd','werden','kunnen','kan',
+  'kon','konden','willen','wil','wilde','wilden','moeten','moet','moest','moesten','mogen','mag',
+  'mocht','zullen','zal','zou','zouden','gaan','gaat','ging','gingen','komen','komt','kwam','kwamen',
+  'zien','ziet','zag','zagen','zeggen','zegt','zei','zeiden','doen','doet','deed','deden','maken',
+  'maakt','maakte','denken','denkt','dacht','weten','weet','wist','nemen','neemt','nam','laten',
+  'laat','liet','horen','hoort','hoorde','staan','staat','stond','liggen','ligt','lag','zitten',
+  'zit','zat','kijken','kijkt','keek','sturen','stuurt','stuurde','bellen','belt','belde',
+  'wachten','wacht','wachtte','vragen','vraagt','vroeg','helpen','helpt','hielp','werken','werkt',
+  'werkte','krijgen','krijgt','kreeg','geven','geeft','gaf','vertellen','vertelt','vertelde',
+  'zetten','zet','zette','zetten','komen','kommen','proberen','probeert','probeerde','gebruiken',
+  'noemen','heet','heten','kennen','kent','kende','blijven','blijft','bleef','schrijven','schrijft',
+  // Dutch adverbs/discourse
+  'even','eens','gewoon','eigenlijk','misschien','zeker','precies','helemaal','prima','graag',
+  'anders','verder','samen','snel','lang','kort','veel','weinig','vaak','altijd','nooit','soms',
+  'bijna','ongeveer','meteen','straks','later','eerst','daarna','alvast','ook','maar','nou',
+  'hoor','oké','oke','klopt','snap','begrijp','bedoel','effe','ff','hm','hmm','ah','eh',
+  'ok','okay','super','top','goed','fijn','kijk','kijkt',
+  // Dutch greetings/fillers
+  'dag','hoi','hai','doei','bye','hallo','gedag','bedankt','dankjewel','dankuwel','graag gedaan',
+  'tot','ziens',
+  // English
   'the','a','an','it','in','on','at','to','for','of','and','or','but','not','with','this','that',
   'are','be','been','have','has','do','does','did','will','would','could','should','may','might',
   'can','i','you','my','your','our','their','yes','no','so','just','if','then','what','how',
   'when','where','who','yeah','uh','um','ah','oh','well','right','okay','sure','hi','hello','bye',
   'know','think','like','get','got','going','want','need','make','see','look','come','go','said',
   'say','saying','told','tell','thing','things','call','called','calling','speak','speaking',
+  'also','very','really','actually','maybe','still','already','here','there','now','then',
 ])
 
 function extractTopics(transcripts) {
@@ -155,6 +178,7 @@ async function main() {
     duration: c.duration || 0,
     wait_time: c.answered_at ? Math.max(0, c.answered_at - c.started_at) : null,
     user_id: c.user?.id || null,
+    number_id: c.number?.id || null,
     has_recording: !!(c.recording || c.asset),
   }))
 

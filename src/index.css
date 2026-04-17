@@ -73,6 +73,7 @@ body {
 
 .toggle-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
 .toggle-btn.active { background: var(--blue); color: #fff; }
+.toggle-btn.disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* ── Layout ── */
 .main {

@@ -46,9 +46,10 @@ export default function Header({ period, onPeriodChange, selectedUsers, onUsersC
           </button>
           {DASHBOARD_USERS.map(u => (
             <button
-              key={u.id}
-              className={`toggle-btn ${selectedUsers.includes(u.id) ? 'active' : ''}`}
-              onClick={() => toggleUser(u.id)}
+              key={u.email}
+              className={`toggle-btn ${selectedUsers.includes(u.id) ? 'active' : ''} ${!u.id ? 'disabled' : ''}`}
+              onClick={() => u.id && toggleUser(u.id)}
+              title={!u.id ? 'Not in Aircall yet' : undefined}
             >
               {u.name}
             </button>
