@@ -31,7 +31,7 @@ export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
       <div className="chart-card">
         <h3 className="card-title">
           Sentiment
-          {!hasAI && <span className="ai-badge">Enable AI for analysis</span>}
+          {!hasAI && <span className="ai-badge">Keyword analysis</span>}
         </h3>
         {sentimentData.length > 0 ? (
           <>
@@ -54,7 +54,7 @@ export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
           </>
         ) : (
           <div className="no-data">
-            {hasAI ? 'No sentiment data for this period' : 'Add ANTHROPIC_API_KEY to GitHub Secrets to enable sentiment'}
+            No sentiment data for selected period
           </div>
         )}
       </div>

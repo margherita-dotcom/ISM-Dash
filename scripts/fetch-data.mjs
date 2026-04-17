@@ -53,6 +53,35 @@ async function fetchTranscription(callId) {
   } catch { return null }
 }
 
+// Simple keyword-based sentiment (Dutch + English)
+const POSITIVE_WORDS = new Set([
+  'goed','prima','super','top','perfect','fijn','bedankt','dankjewel','dankuwel','geweldig',
+  'uitstekend','blij','tevreden','prettig','fijne','mooi','helpen','geholpen','opgelost',
+  'geregeld','gelukt','werkend','werkt','snel','duidelijk','begrijp','begrepen',
+  'good','great','perfect','excellent','happy','satisfied','thanks','thank','helpful',
+  'resolved','fixed','working','works','quick','clear','understand','wonderful','fantastic',
+])
+const NEGATIVE_WORDS = new Set([
+  'slecht','probleem','storing','kapot','klacht','boos','teleurgesteld','niet','nooit',
+  'lang','wachten','wacht','vervelend','fout','verkeerd','mis','kwijt','stuk','defect',
+  'ontevreden','erg','heel','moeilijk','onduidelijk','begrijp niet','snap niet',
+  'bad','problem','broken','complaint','angry','disappointed','never','long','wait',
+  'wrong','error','fault','difficult','unclear','frustrated','issue','fail','failed',
+])
+
+function analyzeSentiment(text) {
+  const words = text.toLowerCase().split(/\s+/)
+  let pos = 0, neg = 0
+  words.forEach(w => {
+    if (POSITIVE_WORDS.has(w)) pos++
+    if (NEGATIVE_WORDS.has(w)) neg++
+  })
+  if (pos === 0 && neg === 0) return 'neutral'
+  if (pos > neg * 1.5) return 'positive'
+  if (neg > pos * 1.5) return 'negative'
+  return 'neutral'
+}
+
 // Dutch + English stop words for transcript topic extraction
 const STOP = new Set([
   'de','het','een','is','dat','op','te','en','van','ik','je','we','ze','hij','zij','dit','die',
@@ -145,16 +174,26 @@ async function main() {
   // Topics from transcript word frequency (always available)
   const topTopics = extractTopics(transcripts)
 
-  // AI sentiment analysis (optional, needs ANTHROPIC_API_KEY)
+  // Sentiment: keyword-based from transcripts (always), Claude if API key provided
   let qualitative = []
-  if (process.env.ANTHROPIC_API_KEY && transcripts.length > 0) {
-    console.log(`Analyzing ${transcripts.length} transcripts with Claude...`)
-    for (let i = 0; i < transcripts.length; i += 20) {
-      const results = await analyzeWithClaude(transcripts.slice(i, i + 20))
-      if (results) qualitative.push(...results)
-      await sleep(500)
+  if (transcripts.length > 0) {
+    if (process.env.ANTHROPIC_API_KEY) {
+      console.log(`Analyzing ${transcripts.length} transcripts with Claude...`)
+      for (let i = 0; i < transcripts.length; i += 20) {
+        const results = await analyzeWithClaude(transcripts.slice(i, i + 20))
+        if (results) qualitative.push(...results)
+        await sleep(500)
+      }
+      console.log(`  ${qualitative.length} calls analyzed`)
+    } else {
+      console.log('Running keyword-based sentiment analysis...')
+      qualitative = transcripts.map(t => ({
+        call_id: t.call_id,
+        sentiment: analyzeSentiment(t.text),
+        topics: [],
+      }))
+      console.log(`  ${qualitative.length} calls analyzed (keyword sentiment)`)
     }
-    console.log(`  ${qualitative.length} calls analyzed`)
   }
 
   mkdirSync(join(ROOT, 'public'), { recursive: true })
