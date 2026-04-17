@@ -22,7 +22,9 @@ export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
       <div className="chart-card">
         <h3 className="card-title">
           Sentiment
-          {!hasAI && <span className="ai-badge">Keyword analysis</span>}
+          <span className="ai-badge">
+            {sentimentData.reduce((s, d) => s + d.value, 0)} calls analyzed
+          </span>
         </h3>
         {sentimentData.length > 0 ? (
           <>

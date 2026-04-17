@@ -53,32 +53,46 @@ async function fetchTranscription(callId) {
   } catch { return null }
 }
 
-// Simple keyword-based sentiment (Dutch + English)
+// Transcript-based sentiment: customer happiness / complaint / aggression vs routine
 const POSITIVE_WORDS = new Set([
-  'goed','prima','super','top','perfect','fijn','bedankt','dankjewel','dankuwel','geweldig',
-  'uitstekend','blij','tevreden','prettig','fijne','mooi','helpen','geholpen','opgelost',
-  'geregeld','gelukt','werkend','werkt','snel','duidelijk','begrijp','begrepen',
-  'good','great','perfect','excellent','happy','satisfied','thanks','thank','helpful',
-  'resolved','fixed','working','works','quick','clear','understand','wonderful','fantastic',
+  // Dutch - customer satisfaction signals
+  'tevreden','blij','fijn','geweldig','super','uitstekend','perfect','prima','top','mooi',
+  'opgelost','geregeld','gelukt','geholpen','dankjewel','dankuwel','bedankt','hartelijk',
+  'prettig','fijne','dag','fijn','positief','goed','werkt','werkend','gerepareerd',
+  'snel','duidelijk','vriendelijk','professioneel','klantvriendelijk','behulpzaam',
+  // English
+  'satisfied','happy','great','excellent','perfect','wonderful','resolved','fixed','working',
+  'thankful','appreciate','appreciated','helpful','friendly','professional','pleased','glad',
+  'awesome','fantastic','brilliant','superb','outstanding','impressed',
 ])
 const NEGATIVE_WORDS = new Set([
-  'slecht','probleem','storing','kapot','klacht','boos','teleurgesteld','niet','nooit',
-  'lang','wachten','wacht','vervelend','fout','verkeerd','mis','kwijt','stuk','defect',
-  'ontevreden','erg','heel','moeilijk','onduidelijk','begrijp niet','snap niet',
-  'bad','problem','broken','complaint','angry','disappointed','never','long','wait',
-  'wrong','error','fault','difficult','unclear','frustrated','issue','fail','failed',
+  // Dutch - complaint / aggression signals
+  'klacht','klachten','onacceptabel','belachelijk','schandalig','schande','walgelijk',
+  'boos','kwaad','woedend','gefrustreerd','teleurgesteld','ontevreden','irritant','irritatie',
+  'kapot','stuk','defect','storing','gevaarlijk','gevaar','brand','risico',
+  'nooit','nimmer','slecht','waardeloos','nutteloos','useless','rampzalig',
+  'terugbetalen','terugbetaling','refund','compensatie','compenseren','schadevergoeding',
+  'advocaat','juridisch','aansprakelijk','aansprakelijkheid','rechtbank','rechtszaak',
+  'eis','eisen','geëist','aangifte','misleid','opgelicht','bedrog',
+  'wachten','wachttijd','eeuwig','uren','dagen','weken','maanden',
+  'fout','fouten','vergissing','misverstand','verkeerd','mis',
+  // English
+  'angry','furious','frustrated','disappointed','complaint','complain','terrible','awful',
+  'broken','dangerous','danger','hazard','refund','compensation','lawyer','legal','lawsuit',
+  'fraud','scam','useless','worthless','never','worst','horrible','disaster','unacceptable',
+  'waiting','waited','ages','forever','mislead','lied','incompetent',
 ])
 
 function analyzeSentiment(text) {
-  const words = text.toLowerCase().split(/\s+/)
+  const words = text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/)
   let pos = 0, neg = 0
   words.forEach(w => {
     if (POSITIVE_WORDS.has(w)) pos++
     if (NEGATIVE_WORDS.has(w)) neg++
   })
   if (pos === 0 && neg === 0) return 'neutral'
-  if (pos > neg * 1.5) return 'positive'
-  if (neg > pos * 1.5) return 'negative'
+  if (neg >= 2 || neg > pos) return 'negative'
+  if (pos >= 2 || pos > neg) return 'positive'
   return 'neutral'
 }
 
@@ -203,9 +217,8 @@ async function main() {
   // Topics from transcript word frequency (always available)
   const topTopics = extractTopics(transcripts)
 
-  // Sentiment: keyword for transcript calls, heuristic for the rest (100% coverage)
+  // Sentiment from transcripts only — keyword analysis on actual call content
   let qualitative = []
-
   if (process.env.ANTHROPIC_API_KEY && transcripts.length > 0) {
     console.log(`Analyzing ${transcripts.length} transcripts with Claude...`)
     for (let i = 0; i < transcripts.length; i += 20) {
@@ -220,21 +233,7 @@ async function main() {
       topics: [],
     }))
   }
-
-  // Heuristic sentiment for all remaining calls (duration/status based)
-  const analyzedIds = new Set(qualitative.map(q => q.call_id))
-  const heuristic = calls
-    .filter(c => !analyzedIds.has(c.id))
-    .map(c => ({
-      call_id: c.id,
-      sentiment: !c.answered_at ? 'negative'
-        : c.duration >= 180 ? 'positive'
-        : c.duration < 20 ? 'neutral'
-        : 'neutral',
-      topics: [],
-    }))
-  qualitative = [...qualitative, ...heuristic]
-  console.log(`Sentiment: ${qualitative.length - heuristic.length} keyword + ${heuristic.length} heuristic`)
+  console.log(`Sentiment: ${qualitative.length} transcript-analyzed calls`)
 
   mkdirSync(join(ROOT, 'public'), { recursive: true })
   writeFileSync(join(ROOT, 'public/data.json'), JSON.stringify({
