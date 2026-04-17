@@ -15,9 +15,18 @@ const PER_PAGE = 50
 async function aircall(path, params = {}) {
   const url = new URL(`https://api.aircall.io${path}`)
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v))
-  const res = await fetch(url.toString(), { headers: { Authorization: `Basic ${AUTH}` } })
-  if (!res.ok) { const b = await res.text().catch(() => ''); throw new Error(`Aircall ${path}: ${res.status} ${b.slice(0, 200)}`) }
-  return res.json()
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const res = await fetch(url.toString(), { headers: { Authorization: `Basic ${AUTH}` } })
+    if (res.status === 429) {
+      const wait = (attempt + 1) * 65000
+      console.log(`\n  Rate limited, waiting ${wait / 1000}s...`)
+      await sleep(wait)
+      continue
+    }
+    if (!res.ok) { const b = await res.text().catch(() => ''); throw new Error(`Aircall ${path}: ${res.status} ${b.slice(0, 200)}`) }
+    return res.json()
+  }
+  throw new Error(`Aircall ${path}: rate limited after 4 attempts`)
 }
 
 async function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
