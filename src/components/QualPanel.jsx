@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts'
 
-const SENTIMENT_COLORS = { positive: '#22c55e', neutral: '#64748b', negative: '#ef4444' }
-const tooltipStyle = { contentStyle: { background: '#1a1d27', border: '1px solid #2a2d3e', borderRadius: 6, color: '#e2e8f0' } }
+const SENTIMENT_COLORS = { positive: '#ccf822', neutral: '#26926a', negative: '#ff6933' }
+const tooltipStyle = { contentStyle: { background: '#0f1d1a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#e8f0ee' } }
 
 export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
   const callIds = new Set(calls.map(c => c.id))
@@ -14,17 +14,8 @@ export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
     .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value, key: name }))
     .filter(d => d.value > 0)
 
-  // If AI enabled, use Claude-extracted topics; otherwise use transcript word frequency
-  let topicsData
-  if (hasAI && qualitative.length > 0) {
-    const freq = {}
-    qualitative.filter(q => callIds.has(q.call_id)).forEach(q => {
-      q.topics?.forEach(t => { freq[t] = (freq[t] || 0) + 1 })
-    })
-    topicsData = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, count]) => ({ name, count }))
-  } else {
-    topicsData = (topTopics || []).slice(0, 10)
-  }
+  // Always use transcript word frequency for topics (reliable, no API needed)
+  const topicsData = (topTopics || []).slice(0, 10)
 
   return (
     <div className="qual-panel">
@@ -70,7 +61,7 @@ export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
               <XAxis type="number" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
               <YAxis type="category" dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} tickLine={false} axisLine={false} width={130} />
               <Tooltip {...tooltipStyle} />
-              <Bar dataKey="count" name="Calls" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" name="Calls" fill="#ff6933" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (

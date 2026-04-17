@@ -109,9 +109,14 @@ const STOP = new Set([
   'bijna','ongeveer','meteen','straks','later','eerst','daarna','alvast','ook','maar','nou',
   'hoor','oké','oke','klopt','snap','begrijp','bedoel','effe','ff','hm','hmm','ah','eh',
   'ok','okay','super','top','goed','fijn','kijk','kijkt',
+  // Dutch discourse/filler
+  'natuurlijk','inderdaad','beetje','goedemiddag','goedemorgen','goedenavond','dank','alleen',
+  'allemaal','hele','zelf','mee','trouwens','sowieso','namelijk','bijvoorbeeld','eigenlijk',
+  'gewoon','alvast','straks','later','eerst','daarna','meteen','ongeveer','bijna','helemaal',
+  'vandaag','morgen','gisteren','volgende','vorige','deze','afgelopen','komende','waarbij',
+  'waarvoor','waarmee','waarom','waarna','daarvoor','daarmee','daarna','waarbij','waardoor',
   // Dutch greetings/fillers
-  'dag','hoi','hai','doei','bye','hallo','gedag','bedankt','dankjewel','dankuwel','graag gedaan',
-  'tot','ziens',
+  'dag','hoi','hai','doei','bye','hallo','gedag','bedankt','dankjewel','dankuwel','tot','ziens',
   // English
   'the','a','an','it','in','on','at','to','for','of','and','or','but','not','with','this','that',
   'are','be','been','have','has','do','does','did','will','would','could','should','may','might',
@@ -198,27 +203,38 @@ async function main() {
   // Topics from transcript word frequency (always available)
   const topTopics = extractTopics(transcripts)
 
-  // Sentiment: keyword-based from transcripts (always), Claude if API key provided
+  // Sentiment: keyword for transcript calls, heuristic for the rest (100% coverage)
   let qualitative = []
-  if (transcripts.length > 0) {
-    if (process.env.ANTHROPIC_API_KEY) {
-      console.log(`Analyzing ${transcripts.length} transcripts with Claude...`)
-      for (let i = 0; i < transcripts.length; i += 20) {
-        const results = await analyzeWithClaude(transcripts.slice(i, i + 20))
-        if (results) qualitative.push(...results)
-        await sleep(500)
-      }
-      console.log(`  ${qualitative.length} calls analyzed`)
-    } else {
-      console.log('Running keyword-based sentiment analysis...')
-      qualitative = transcripts.map(t => ({
-        call_id: t.call_id,
-        sentiment: analyzeSentiment(t.text),
-        topics: [],
-      }))
-      console.log(`  ${qualitative.length} calls analyzed (keyword sentiment)`)
+
+  if (process.env.ANTHROPIC_API_KEY && transcripts.length > 0) {
+    console.log(`Analyzing ${transcripts.length} transcripts with Claude...`)
+    for (let i = 0; i < transcripts.length; i += 20) {
+      const results = await analyzeWithClaude(transcripts.slice(i, i + 20))
+      if (results) qualitative.push(...results)
+      await sleep(500)
     }
+  } else if (transcripts.length > 0) {
+    qualitative = transcripts.map(t => ({
+      call_id: t.call_id,
+      sentiment: analyzeSentiment(t.text),
+      topics: [],
+    }))
   }
+
+  // Heuristic sentiment for all remaining calls (duration/status based)
+  const analyzedIds = new Set(qualitative.map(q => q.call_id))
+  const heuristic = calls
+    .filter(c => !analyzedIds.has(c.id))
+    .map(c => ({
+      call_id: c.id,
+      sentiment: !c.answered_at ? 'negative'
+        : c.duration >= 180 ? 'positive'
+        : c.duration < 20 ? 'neutral'
+        : 'neutral',
+      topics: [],
+    }))
+  qualitative = [...qualitative, ...heuristic]
+  console.log(`Sentiment: ${qualitative.length - heuristic.length} keyword + ${heuristic.length} heuristic`)
 
   mkdirSync(join(ROOT, 'public'), { recursive: true })
   writeFileSync(join(ROOT, 'public/data.json'), JSON.stringify({
