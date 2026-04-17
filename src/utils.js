@@ -17,14 +17,23 @@ function isRelevantCall(c) {
 export function getPeriodBounds(period) {
   const now = Math.floor(Date.now() / 1000)
   const yearStart = Math.floor(new Date(new Date().getFullYear(), 0, 1).getTime() / 1000)
-  return { day: now - 86400, week: now - 7 * 86400, month: now - 30 * 86400, year: yearStart }[period]
+  if (period === 'day') {
+    const d = new Date()
+    const midnight = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0)
+    const noon = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0)
+    return { from: Math.floor(midnight.getTime() / 1000), to: Math.floor(noon.getTime() / 1000) }
+  }
+  return {
+    from: { week: now - 7 * 86400, month: now - 30 * 86400, year: yearStart }[period],
+    to: now,
+  }
 }
 
 export function filterCalls(calls, period, selectedUserIds) {
-  const from = getPeriodBounds(period)
+  const { from, to } = getPeriodBounds(period)
   return calls.filter(c => {
     if (!isRelevantCall(c)) return false
-    if (c.started_at < from) return false
+    if (c.started_at < from || c.started_at > to) return false
     if (selectedUserIds.length > 0 && !selectedUserIds.includes(c.user_id)) return false
     return true
   })

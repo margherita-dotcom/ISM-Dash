@@ -1,7 +1,34 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 
 const SENTIMENT_COLORS = { positive: '#ccf822', neutral: '#26926a', negative: '#ff6933' }
 const tooltipStyle = { contentStyle: { background: '#0f1d1a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#e8f0ee' } }
+
+const NL_EN = {
+  warmtepomp: 'heat pump', storing: 'malfunction', installateur: 'installer',
+  installatie: 'installation', afspraak: 'appointment', datum: 'date',
+  planning: 'scheduling', monteur: 'technician', garantie: 'warranty',
+  factuur: 'invoice', betaling: 'payment', terugbetaling: 'refund',
+  probleem: 'problem', klacht: 'complaint', reparatie: 'repair',
+  onderdeel: 'spare part', onderhoud: 'maintenance', aansluiting: 'connection',
+  verwarming: 'heating', warmwater: 'hot water', subsidie: 'subsidy',
+  offerte: 'quote', lekkage: 'leak', druk: 'pressure', thermostaat: 'thermostat',
+  ketel: 'boiler', radiator: 'radiator', vloerverwarming: 'underfloor heating',
+  foutcode: 'error code', technicus: 'technician', contract: 'contract',
+  adres: 'address', klant: 'customer', pomp: 'pump', koeling: 'cooling',
+  temperatuur: 'temperature', buitenunit: 'outdoor unit', binnenunit: 'indoor unit',
+  inbedrijfstelling: 'commissioning', oplevering: 'handover', levering: 'delivery',
+  bestelling: 'order', annulering: 'cancellation', wachttijd: 'waiting time',
+  terugbellen: 'callback', urgent: 'urgent', spoed: 'urgent', defect: 'defect',
+  kapot: 'broken', service: 'service', nummer: 'number', registratie: 'registration',
+  activering: 'activation', stroomstoring: 'power outage', reset: 'reset',
+  woensdag: 'wednesday', dinsdag: 'tuesday', maandag: 'monday', vrijdag: 'friday',
+  donderdag: 'thursday', januari: 'january', februari: 'february', maart: 'march',
+  april: 'april', telefoon: 'phone', adres: 'address',
+}
+
+function translate(word) {
+  return NL_EN[word.toLowerCase()] || word
+}
 
 export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
   const callIds = new Set(calls.map(c => c.id))
@@ -14,7 +41,6 @@ export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
     .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value, key: name }))
     .filter(d => d.value > 0)
 
-  // Always use transcript word frequency for topics (reliable, no API needed)
   const topicsData = (topTopics || []).slice(0, 10)
 
   return (
@@ -46,26 +72,32 @@ export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
             </div>
           </>
         ) : (
-          <div className="no-data">
-            No sentiment data for selected period
-          </div>
+          <div className="no-data">No sentiment data for selected period</div>
         )}
       </div>
 
       <div className="chart-card">
         <h3 className="card-title">
           Top Topics
-          {!hasAI && <span className="ai-badge">From transcripts</span>}
+          <span className="ai-badge">From transcripts</span>
         </h3>
         {topicsData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={topicsData} layout="vertical" margin={{ left: 10, right: 20, top: 5, bottom: 5 }}>
-              <XAxis type="number" tick={{ fill: '#64748b', fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
-              <YAxis type="category" dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} tickLine={false} axisLine={false} width={130} />
-              <Tooltip {...tooltipStyle} />
-              <Bar dataKey="count" name="Calls" fill="#ff6933" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <table className="topics-table">
+            <thead>
+              <tr>
+                <th>Topic</th>
+                <th>Mentions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topicsData.map(t => (
+                <tr key={t.name}>
+                  <td>{translate(t.name)}</td>
+                  <td>{t.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <div className="no-data">No topic data available</div>
         )}
