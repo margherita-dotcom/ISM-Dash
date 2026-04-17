@@ -3,7 +3,7 @@ export const DASHBOARD_USERS = [
   { id: 1728051, name: 'Wies', email: 'wies@quatt.io' },
   { id: 1788663, name: 'Valentina', email: 'valentina@quatt.io' },
   { id: 1843372, name: 'Bassel', email: 'bassel@quatt.io' },
-  { id: null, name: 'Jessey', email: 'jessey@quatt.io' }, // not in Aircall yet
+  { id: 1904272, name: 'Jessey', email: 'jessey@quatt.io' },
 ]
 
 const DASHBOARD_USER_IDS = new Set(DASHBOARD_USERS.map(u => u.id).filter(Boolean))
