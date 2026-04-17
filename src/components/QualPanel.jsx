@@ -4,26 +4,33 @@ const SENTIMENT_COLORS = { positive: '#ccf822', neutral: '#26926a', negative: '#
 const tooltipStyle = { contentStyle: { background: '#0f1d1a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#e8f0ee' } }
 
 const NL_EN = {
-  warmtepomp: 'heat pump', storing: 'malfunction', installateur: 'installer',
-  installatie: 'installation', afspraak: 'appointment', datum: 'date',
-  planning: 'scheduling', monteur: 'technician', garantie: 'warranty',
-  factuur: 'invoice', betaling: 'payment', terugbetaling: 'refund',
-  probleem: 'problem', klacht: 'complaint', reparatie: 'repair',
-  onderdeel: 'spare part', onderhoud: 'maintenance', aansluiting: 'connection',
-  verwarming: 'heating', warmwater: 'hot water', subsidie: 'subsidy',
-  offerte: 'quote', lekkage: 'leak', druk: 'pressure', thermostaat: 'thermostat',
-  ketel: 'boiler', radiator: 'radiator', vloerverwarming: 'underfloor heating',
-  foutcode: 'error code', technicus: 'technician', contract: 'contract',
-  adres: 'address', klant: 'customer', pomp: 'pump', koeling: 'cooling',
-  temperatuur: 'temperature', buitenunit: 'outdoor unit', binnenunit: 'indoor unit',
-  inbedrijfstelling: 'commissioning', oplevering: 'handover', levering: 'delivery',
-  bestelling: 'order', annulering: 'cancellation', wachttijd: 'waiting time',
-  terugbellen: 'callback', urgent: 'urgent', spoed: 'urgent', defect: 'defect',
-  kapot: 'broken', service: 'service', nummer: 'number', registratie: 'registration',
-  activering: 'activation', stroomstoring: 'power outage', reset: 'reset',
-  woensdag: 'wednesday', dinsdag: 'tuesday', maandag: 'monday', vrijdag: 'friday',
-  donderdag: 'thursday', januari: 'january', februari: 'february', maart: 'march',
-  april: 'april', telefoon: 'phone', adres: 'address',
+  // Product & technical
+  warmtepomp: 'heat pump', pomp: 'pump', buitenunit: 'outdoor unit', binnenunit: 'indoor unit',
+  storing: 'malfunction', defect: 'defect', kapot: 'broken', foutcode: 'error code',
+  reset: 'reset', stroomstoring: 'power outage', lekkage: 'leak', druk: 'pressure',
+  thermostaat: 'thermostat', ketel: 'boiler', radiator: 'radiator',
+  vloerverwarming: 'underfloor heating', verwarming: 'heating', koeling: 'cooling',
+  warmwater: 'hot water', aansluiting: 'connection', temperatuur: 'temperature',
+  // Service & people
+  installateur: 'installer', installatie: 'installation', monteur: 'technician',
+  technicus: 'technician', inbedrijfstelling: 'commissioning', onderhoud: 'maintenance',
+  reparatie: 'repair', onderdeel: 'spare part', service: 'service',
+  // Planning
+  afspraak: 'appointment', datum: 'date', planning: 'scheduling', oplevering: 'handover',
+  levering: 'delivery', wachttijd: 'waiting time', spoed: 'urgent', urgent: 'urgent',
+  terugbellen: 'callback',
+  // Commercial
+  garantie: 'warranty', factuur: 'invoice', betaling: 'payment', terugbetaling: 'refund',
+  subsidie: 'subsidy', offerte: 'quote', contract: 'contract', bestelling: 'order',
+  annulering: 'cancellation',
+  // Customer / admin
+  klant: 'customer', klacht: 'complaint', probleem: 'problem', adres: 'address',
+  nummer: 'number', telefoon: 'phone', registratie: 'registration', activering: 'activation',
+  // Days / months that slip through
+  maandag: 'monday', dinsdag: 'tuesday', woensdag: 'wednesday', donderdag: 'thursday',
+  vrijdag: 'friday', januari: 'january', februari: 'february', maart: 'march',
+  april: 'april', mei: 'may', juni: 'june', juli: 'july', augustus: 'august',
+  september: 'september', oktober: 'october', november: 'november', december: 'december',
 }
 
 function translate(word) {

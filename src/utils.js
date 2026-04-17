@@ -20,8 +20,8 @@ export function getPeriodBounds(period) {
   if (period === 'day') {
     const d = new Date()
     const midnight = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0)
-    const noon = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0)
-    return { from: Math.floor(midnight.getTime() / 1000), to: Math.floor(noon.getTime() / 1000) }
+    const endOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59)
+    return { from: Math.floor(midnight.getTime() / 1000), to: Math.floor(endOfDay.getTime() / 1000) }
   }
   return {
     from: { week: now - 7 * 86400, month: now - 30 * 86400, year: yearStart }[period],
