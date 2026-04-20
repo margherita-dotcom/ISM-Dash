@@ -57,8 +57,10 @@ export function computeKPIs(calls) {
 export function formatDuration(seconds) {
   if (!seconds) return '0s'
   if (seconds < 60) return `${seconds}s`
-  const m = Math.floor(seconds / 60)
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
   const s = seconds % 60
+  if (h > 0) return s > 0 ? `${h}h ${m}m ${s}s` : `${h}h ${m}m`
   return s > 0 ? `${m}m ${s}s` : `${m}m`
 }
 
