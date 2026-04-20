@@ -3,6 +3,7 @@ import { DASHBOARD_USERS } from '../utils'
 const PERIODS = [
   { key: 'day', label: 'Today' },
   { key: 'week', label: 'This Week' },
+  { key: 'lastweek', label: 'Last Week' },
   { key: 'month', label: 'This Month' },
   { key: 'year', label: 'This Year' },
 ]

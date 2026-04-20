@@ -61,6 +61,7 @@ export default function App() {
           <KPICard label="Inbound" value={kpis.inbound} color="blue" />
           <KPICard label="Outbound" value={kpis.outbound} color="green" />
           <KPICard label="Missed" value={kpis.missed} color="red" />
+          <KPICard label="Total Hours" value={formatDuration(kpis.totalDuration)} color="green" />
           <KPICard label="Avg Duration" value={formatDuration(kpis.avgDuration)} color="purple" />
           <KPICard label="Avg Wait Time" value={formatDuration(kpis.avgWait)} color="yellow" />
         </div>

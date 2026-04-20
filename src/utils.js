@@ -23,6 +23,13 @@ export function getPeriodBounds(period) {
     const endOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59)
     return { from: Math.floor(midnight.getTime() / 1000), to: Math.floor(endOfDay.getTime() / 1000) }
   }
+  if (period === 'lastweek') {
+    const d = new Date()
+    const dayOfWeek = d.getDay() === 0 ? 7 : d.getDay() // Mon=1 … Sun=7
+    const lastMonday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - dayOfWeek - 6, 0, 0, 0)
+    const lastSunday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - dayOfWeek, 23, 59, 59)
+    return { from: Math.floor(lastMonday.getTime() / 1000), to: Math.floor(lastSunday.getTime() / 1000) }
+  }
   return {
     from: { week: now - 7 * 86400, month: now - 30 * 86400, year: yearStart }[period],
     to: now,
@@ -51,7 +58,8 @@ export function computeKPIs(calls) {
   const avgWait = answeredWithWait.length
     ? Math.round(answeredWithWait.reduce((s, c) => s + c.wait_time, 0) / answeredWithWait.length)
     : 0
-  return { inbound, outbound, missed, avgDuration, avgWait, total: calls.length }
+  const totalDuration = calls.reduce((s, c) => s + (c.duration || 0), 0)
+  return { inbound, outbound, missed, avgDuration, avgWait, total: calls.length, totalDuration }
 }
 
 export function formatDuration(seconds) {
@@ -70,9 +78,16 @@ export function computeVolumeData(calls, period) {
     calls.forEach(c => { hours[new Date(c.started_at * 1000).getHours()].count++ })
     return hours
   }
-  if (period === 'week') {
+  if (period === 'week' || period === 'lastweek') {
+    const anchor = new Date()
+    if (period === 'lastweek') {
+      const dow = anchor.getDay() === 0 ? 7 : anchor.getDay()
+      anchor.setDate(anchor.getDate() - dow - 6)
+    } else {
+      anchor.setDate(anchor.getDate() - 6)
+    }
     const days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(); d.setDate(d.getDate() - (6 - i))
+      const d = new Date(anchor); d.setDate(anchor.getDate() + i)
       return { label: d.toLocaleDateString('en', { weekday: 'short', day: 'numeric' }), count: 0, key: d.toDateString() }
     })
     calls.forEach(c => {
