@@ -39,7 +39,13 @@ export default function App() {
   const kpis = computeKPIs(filtered)
   const volumeData = computeVolumeData(filtered, period)
   const heatmapData = computeHeatmapData(filtered)
-  const userStats = computeUserStats(filtered, DASHBOARD_USERS)
+  const allUserStats = computeUserStats(filtered, DASHBOARD_USERS)
+  const userStats = selectedUsers.length > 0
+    ? allUserStats.filter(row => {
+        const u = DASHBOARD_USERS.find(u => u.name === row.name)
+        return u && selectedUsers.includes(u.id)
+      })
+    : allUserStats
 
   return (
     <div className="app">

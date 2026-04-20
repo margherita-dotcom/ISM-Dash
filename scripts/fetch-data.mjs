@@ -154,13 +154,14 @@ function extractTopics(transcripts) {
   const freq = {}
   for (const { text } of transcripts) {
     const words = text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/)
-    words.forEach(w => {
-      if (w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w)) {
-        freq[w] = (freq[w] || 0) + 1
-      }
-    })
+      .filter(w => w.length > 3 && !STOP.has(w) && !/^\d+$/.test(w))
+    for (let i = 0; i < words.length - 1; i++) {
+      const bigram = `${words[i]} ${words[i + 1]}`
+      freq[bigram] = (freq[bigram] || 0) + 1
+    }
   }
   return Object.entries(freq)
+    .filter(([, count]) => count >= 2)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 15)
     .map(([name, count]) => ({ name, count }))

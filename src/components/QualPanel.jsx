@@ -37,6 +37,10 @@ function translate(word) {
   return NL_EN[word.toLowerCase()] || word
 }
 
+function translatePhrase(phrase) {
+  return phrase.split(' ').map(translate).join(' ')
+}
+
 export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
   const callIds = new Set(calls.map(c => c.id))
 
@@ -99,7 +103,7 @@ export default function QualPanel({ calls, qualitative, topTopics, hasAI }) {
             <tbody>
               {topicsData.map(t => (
                 <tr key={t.name}>
-                  <td>{translate(t.name)}</td>
+                  <td>{translatePhrase(t.name)}</td>
                   <td>{t.count}</td>
                 </tr>
               ))}

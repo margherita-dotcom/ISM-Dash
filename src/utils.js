@@ -117,21 +117,34 @@ export function computeHeatmapData(calls) {
 }
 
 export function computeUserStats(calls, users) {
-  const stats = Object.fromEntries(users.map(u => [u.id, { name: u.name, handled: 0, answered: 0, totalDuration: 0 }]))
+  const stats = Object.fromEntries(users.map(u => [u.id, {
+    name: u.name,
+    inbound: 0, inboundAnswered: 0,
+    outbound: 0, outboundAnswered: 0,
+    totalDuration: 0,
+  }]))
   calls.forEach(c => {
     if (c.user_id && stats[c.user_id]) {
-      stats[c.user_id].handled++
-      if (c.answered_at) {
-        stats[c.user_id].answered++
-        stats[c.user_id].totalDuration += c.duration
+      const s = stats[c.user_id]
+      if (c.direction === 'inbound') {
+        s.inbound++
+        if (c.answered_at) { s.inboundAnswered++; s.totalDuration += c.duration }
+      } else {
+        s.outbound++
+        if (c.answered_at) { s.outboundAnswered++; s.totalDuration += c.duration }
       }
     }
   })
-  return users.map(u => ({
-    name: u.name,
-    handled: stats[u.id].handled,
-    answered: stats[u.id].answered,
-    avgDuration: stats[u.id].answered ? Math.round(stats[u.id].totalDuration / stats[u.id].answered) : 0,
-    answerRate: stats[u.id].handled ? Math.round((stats[u.id].answered / stats[u.id].handled) * 100) : 0,
-  })).sort((a, b) => b.handled - a.handled)
+  return users.map(u => {
+    const s = stats[u.id]
+    return {
+      name: u.name,
+      inbound: s.inbound,
+      outbound: s.outbound,
+      inboundPickupRate: s.inbound ? Math.round((s.inboundAnswered / s.inbound) * 100) : 0,
+      outboundPickupRate: s.outbound ? Math.round((s.outboundAnswered / s.outbound) * 100) : 0,
+      totalDuration: s.totalDuration,
+      handled: s.inbound + s.outbound,
+    }
+  }).sort((a, b) => b.handled - a.handled)
 }
